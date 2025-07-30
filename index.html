@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول</title>
+  <style>
+    body { font-family: 'Segoe UI'; direction: rtl; background-color: #eef; display: flex; align-items: center; justify-content: center; height: 100vh; }
+    .login-box { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
+    button { background-color: #007bff; color: white; font-weight: bold; margin-top: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🔐 تسجيل الدخول</h2>
+
+    <label for="username">اسم المستخدم:</label>
+    <input type="text" id="username" placeholder="ادخل اسم المستخدم">
+
+    <label for="password">كلمة المرور:</label>
+    <input type="password" id="password" placeholder="ادخل كلمة المرور">
+
+    <button onclick="checkLogin()">دخول</button>
+  </div>
+
+  <script>
+    const USERS = [
+      { username: "admin", password: "admin123" },
+      { username: "muath", password: "muath123" }
+    ];
+
+    function checkLogin() {
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      const match = USERS.find(u => u.username === user && u.password === pass);
+
+      if (match) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("loggedUser", match.username);
+        window.location.href = "page1.html";
+      } else {
+        alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة.");
+      }
+    }
+  </script>
+</body>
+</html>

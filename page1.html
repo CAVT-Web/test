@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>نموذج حجز سيارة</title>
+  <style>
+    body { font-family: 'Segoe UI'; direction: rtl; background-color: #f5f5f5; padding: 30px; }
+    form { background-color: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, select, button { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+    button { background-color: #007bff; color: white; border: none; font-size: 16px; cursor: pointer; margin-top: 20px; }
+    .info-box { background-color: #eef; padding: 10px; margin-top: 15px; border: 1px solid #99c; border-radius: 6px; text-align: center; font-weight: bold; color: #333; }
+    .edit-alert { background-color: #ffd; color: #333; padding: 10px; text-align: center; border: 1px solid #cc0; border-radius: 6px; margin-bottom: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div id="navbar" style="background:#007bff; padding:10px; color:white; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+  <div>
+    <a href="index.html" style="color:white; margin-right:15px;">🚗 الحجز</a>
+    <a href="dashboard.html" style="color:white; margin-right:15px;">📋 الحجوزات</a>
+    <a href="settings.html" style="color:white; margin-right:15px;">⚙️ الإعدادات</a>
+  </div>
+  <div>
+    👤 مرحبًا، <span id="usernameDisplay"></span>
+    <a href="#" onclick="logout()" style="color:#ffdddd; margin-right:15px;">🚪 خروج</a>
+  </div>
+</div>
+
+<script>
+  // الحماية من الدخول بدون تسجيل
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    alert("🔐 يرجى تسجيل الدخول أولاً");
+    window.location.href = "login.html";
+  }
+
+  // عرض اسم المستخدم
+  const username = localStorage.getItem("loggedUser") || "مستخدم";
+  document.getElementById("usernameDisplay").textContent = username;
+
+  // تسجيل الخروج
+  function logout() {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("loggedUser");
+    window.location.href = "login.html";
+  }
+</script>
+  <form id="bookingForm">
+    <div id="editNotice" class="edit-alert" style="display:none;">📝 تعديل حجز قائم</div>
+
+    <label for="name">الاسم الكامل:</label>
+    <input type="text" id="name" required>
+
+    <label for="phone">رقم الهاتف:</label>
+    <input type="tel" id="phone" required>
+
+    <label for="car">اختر السيارة:</label>
+    <select id="car"></select>
+
+    <label for="start">تاريخ الاستلام:</label>
+    <input type="date" id="start" required>
+
+    <label for="end">تاريخ الإرجاع:</label>
+    <input type="date" id="end" required>
+
+    <label for="location">موقع الاستلام:</label>
+    <input type="text" id="location" required>
+
+    <div id="duration" class="info-box"></div>
+    <div id="price" class="info-box"></div>
+
+    <button type="submit">إرسال الحجز</button>
+  </form>
+
+  <script>
+    const startDateInput = document.getElementById("start");
+    const endDateInput = document.getElementById("end");
+    const carSelect = document.getElementById("car");
+    const durationDiv = document.getElementById("duration");
+    const priceDiv = document.getElementById("price");
+    const editNotice = document.getElementById("editNotice");
+    let editingIndex = -1;
+
+    function loadCars() {
+             const defaultCars = [
+        { name: "Toyota Camry", price: 30 },
+        
+      ];
+
+      
+      const userCars = JSON.parse(localStorage.getItem("cars") || "[]");
+      const allCars = [...defaultCars, ...userCars];
+      carSelect.innerHTML = "";
+      allCars.forEach(car => {
+        const option = document.createElement("option");
+        option.value = car.name;
+        option.setAttribute("data-price", car.price);
+        option.textContent = `${car.name} - ${car.price}JD/يوم`;
+        carSelect.appendChild(option);
+      });
+    }
+
+    function updateDetails() {
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      if (!isNaN(startDate) && !isNaN(endDate) && endDate > startDate) {
+        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const pricePerDay = parseInt(carSelect.selectedOptions[0].getAttribute("data-price"), 10);
+        const totalPrice = duration * pricePerDay;
+        durationDiv.textContent = `عدد الأيام: ${duration}`;
+        priceDiv.textContent = `السعر الإجمالي: ${totalPrice} دينار أردني`;
+      } else {
+        durationDiv.textContent = '';
+        priceDiv.textContent = '';
+      }
+    }
+
+    const editData = localStorage.getItem("editBooking");
+    if (editData) {
+      const data = JSON.parse(editData);
+      document.getElementById("name").value = data.name;
+      document.getElementById("phone").value = data.phone;
+      document.getElementById("car").value = data.car;
+      document.getElementById("start").value = data.start;
+      document.getElementById("end").value = data.end;
+      document.getElementById("location").value = data.location;
+      editingIndex = data.index;
+      localStorage.removeItem("editBooking");
+      editNotice.style.display = "block";
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const booking = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        car: document.getElementById("car").value,
+        start: document.getElementById("start").value,
+        end: document.getElementById("end").value,
+        location: document.getElementById("location").value,
+        duration: durationDiv.textContent,
+        total: priceDiv.textContent
+      };
+
+      let bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+      if (editingIndex >= 0) {
+        bookings[editingIndex] = booking;
+      } else {
+        bookings.push(booking);
+      }
+
+      localStorage.setItem("bookings", JSON.stringify(bookings));
+      alert("✅ تم حفظ الحجز بنجاح!");
+      window.location.href = "dashboard.html";
+    });
+
+    carSelect.addEventListener("change", updateDetails);
+    startDateInput.addEventListener("change", updateDetails);
+    endDateInput.addEventListener("change", updateDetails);
+
+    loadCars();
+    updateDetails();
+  </script>
+
+</body>
+</html>

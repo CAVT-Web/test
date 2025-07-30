@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>الإعدادات</title>
+  <style>
+    body { font-family: 'Segoe UI'; direction: rtl; background-color: #f0f0f0; margin: 0; padding-top: 60px; }
+
+    /* ✅ شريط التنقل العلوي */
+    .navbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      background-color: #007bff;
+      color: white;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h2, h3 { margin-bottom: 20px; color: #333; padding: 0 30px; }
+    label { display: block; margin-top: 15px; font-weight: bold; padding: 0 30px; }
+    input, button {
+      width: calc(100% - 60px);
+      margin: 5px 30px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button { font-weight: bold; cursor: pointer; margin-top: 15px; }
+    .danger { background-color: #dc3545; color: white; }
+    .stats-box {
+      background-color: #eef;
+      padding: 15px 30px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      border: 1px solid #99c;
+    }
+    .car-item {
+      background:#fff;
+      padding:10px;
+      margin:10px 30px;
+      border-radius:6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .car-item button {
+      margin-top: 8px;
+      margin-left: 8px;
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+<div id="navbar" style="background:#007bff; padding:10px; color:white; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+  <div>
+    <a href="index.html" style="color:white; margin-right:15px;">🚗 الحجز</a>
+    <a href="dashboard.html" style="color:white; margin-right:15px;">📋 الحجوزات</a>
+    <a href="settings.html" style="color:white; margin-right:15px;">⚙️ الإعدادات</a>
+  </div>
+  <div>
+    👤 مرحبًا، <span id="usernameDisplay"></span>
+    <a href="#" onclick="logout()" style="color:#ffdddd; margin-right:15px;">🚪 خروج</a>
+  </div>
+</div>
+
+  <!-- ✅ شريط التنقل العلوي -->
+  <div class="navbar">لوحة الإعدادات 🚗</div>
+
+  <h2>⚙️ إعدادات النظام</h2>
+
+  <label for="carName">اسم السيارة:</label>
+  <input type="text" id="carName">
+
+  <label for="carPrice">سعر الإيجار اليومي (دينار):</label>
+  <input type="number" id="carPrice">
+
+  <button onclick="addCar()" style="background-color:#28a745; color:white;">➕ إضافة سيارة</button>
+
+  <h3>🚗 قائمة السيارات المسجلة</h3>
+  <div id="carList"></div>
+
+  <hr>
+
+  <button class="danger" onclick="clearBookings()">🗑 حذف جميع الحجوزات</button>
+
+  <div class="stats-box" id="statsBox"></div>
+
+  <script>
+    function getCars() {
+      return JSON.parse(localStorage.getItem("cars") || "[]");
+    }
+
+    function saveCars(cars) {
+      localStorage.setItem("cars", JSON.stringify(cars));
+    }
+
+    function addCar() {
+      const name = document.getElementById("carName").value.trim();
+      const price = parseInt(document.getElementById("carPrice").value, 10);
+      if (name && !isNaN(price)) {
+        const cars = getCars();
+        cars.push({ name, price });
+        saveCars(cars);
+        showCarList();
+        document.getElementById("carName").value = "";
+        document.getElementById("carPrice").value = "";
+        alert(`✅ تم تسجيل السيارة: ${name} بسعر ${price} دينار/يوم`);
+      } else {
+        alert("⚠️ يرجى إدخال اسم وسعر صالح.");
+      }
+    }
+
+    function showCarList() {
+      const cars = getCars();
+      const listDiv = document.getElementById("carList");
+      if (cars.length === 0) {
+        listDiv.innerHTML = "<i style='padding:30px;'>لا توجد سيارات مسجلة حالياً.</i>";
+        return;
+      }
+
+      listDiv.innerHTML = "";
+      cars.forEach((car, index) => {
+        const item = document.createElement("div");
+        item.className = "car-item";
+        item.innerHTML = `
+          <strong>${car.name}</strong> — ${car.price} دينار/يوم<br>
+          <button onclick="editCar(${index})" style="background-color:#ffc107; color:black;">✏️ تعديل</button>
+          <button onclick="deleteCar(${index})" class="danger">🗑 حذف</button>
+        `;
+        listDiv.appendChild(item);
+      });
+    }
+
+    function editCar(index) {
+      const cars = getCars();
+      const car = cars[index];
+      const newName = prompt("🔄 تعديل اسم السيارة:", car.name);
+      const newPrice = prompt("🔄 تعديل السعر اليومي:", car.price);
+
+      if (newName && !isNaN(newPrice) && newPrice !== "") {
+        cars[index] = { name: newName.trim(), price: parseInt(newPrice, 10) };
+        saveCars(cars);
+        showCarList();
+        alert("✅ تم تعديل بيانات السيارة!");
+      } else {
+        alert("⚠️ إدخال غير صالح، لم يتم التعديل.");
+      }
+    }
+
+    function deleteCar(index) {
+      const cars = getCars();
+      if (confirm(`هل تريد حذف السيارة "${cars[index].name}"؟`)) {
+        cars.splice(index, 1);
+        saveCars(cars);
+        showCarList();
+        alert("🚗 تم حذف السيارة بنجاح.");
+      }
+    }
+
+    function clearBookings() {
+      if (confirm("هل أنت متأكد من حذف جميع الحجوزات؟")) {
+        localStorage.removeItem("bookings");
+        alert("✅ تم حذف جميع الحجوزات.");
+        showStats();
+      }
+    }
+
+    function showStats() {
+      const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+      let total = 0;
+      let days = 0;
+      bookings.forEach(b => {
+        total += parseInt(b.total.replace("السعر الإجمالي: ", "").replace(" دينار أردني", ""));
+        days += parseInt(b.duration.replace("عدد الأيام: ", ""));
+      });
+
+      document.getElementById("statsBox").innerHTML = `
+        📊 <strong>إحصائيات إجمالية:</strong><br>
+        🔢 عدد الحجوزات: ${bookings.length}<br>
+        📅 مجموع الأيام: ${days}<br>
+        💰 إجمالي المداخيل: ${total} دينار أردني
+      `;
+    }
+
+    // تحميل عند فتح الصفحة
+    window.onload = function () {
+      showStats();
+      showCarList();
+    };
+  </script>
+
+</body>
+</html>
