@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>📋 صفحة الحجوزات</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    alert("⚠️ يجب تسجيل الدخول أولاً.");
+    window.location.href = "index.html"; // عدّل حسب اسم صفحة تسجيل الدخول
+  }
+</script>
   <style>
     body { font-family: 'Segoe UI'; direction: rtl; background-color: #fafafa; padding: 20px; }
 
