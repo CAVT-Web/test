@@ -12,6 +12,13 @@
     .info-box { background-color: #eef; padding: 10px; margin-top: 15px; border: 1px solid #99c; border-radius: 6px; text-align: center; font-weight: bold; color: #333; }
     .edit-alert { background-color: #ffd; color: #333; padding: 10px; text-align: center; border: 1px solid #cc0; border-radius: 6px; margin-bottom: 10px; font-weight: bold; }
   </style>
+
+  <script>
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    alert("⚠️ يجب تسجيل الدخول أولاً.");
+    window.location.href = "index.html"; // عدّل حسب اسم صفحة تسجيل الدخول
+  }
+</script>
 </head>
 <body>
 <div id="navbar" style="background:#007bff; padding:10px; color:white; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
