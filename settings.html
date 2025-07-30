@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>الإعدادات</title>
+  <script>
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    alert("⚠️ يجب تسجيل الدخول أولاً.");
+    window.location.href = "index.html"; // عدّل حسب اسم صفحة تسجيل الدخول
+  }
+</script>
   <style>
     body { font-family: 'Segoe UI'; direction: rtl; background-color: #f0f0f0; margin: 0; padding-top: 60px; }
 
